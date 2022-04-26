@@ -48,11 +48,38 @@ module.exports = {
       port: 8545,            // Standard Ethereum port (default: none)
       network_id: "*",       // Any network (default: none)
     },
-    rinkeby: {
+    'rinkeby-infura1': {
       provider: () => (
         new HDWalletProvider(
           process.env.MNEMONIC1,
-          `wss://rinkeby.infura.io/ws/v3/${process.env.INFURA_ID}`
+          `wss://rinkeby.infura.io/ws/v3/${process.env.INFURA_ID1}`
+        )
+      ),
+      network_id: 4
+    },
+    'rinkeby-infura2': {
+      provider: () => (
+        new HDWalletProvider(
+          process.env.MNEMONIC1,
+          `wss://rinkeby.infura.io/ws/v3/${process.env.INFURA_ID2}`
+        )
+      ),
+      network_id: 4
+    },
+    'rinkeby-alchemy1': {
+      provider: () => (
+        new HDWalletProvider(
+          process.env.MNEMONIC1,
+          `wss://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_ID1}`
+        )
+      ),
+      network_id: 4
+    },
+    'rinkeby-alchemy2': {
+      provider: () => (
+        new HDWalletProvider(
+          process.env.MNEMONIC1,
+          `wss://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_ID2}`
         )
       ),
       network_id: 4
