@@ -36,31 +36,14 @@ contract Game {
         return tokens.balanceOf(msg.sender);
     }
 
-    event GameApprovedForSpending(address indexed user_, address indexed contract_, uint amount_);
-    event GameApprovalReset(address indexed user_, address indexed contrac_, uint amount_);
-    
-    function approveSpend()
-        public
-    {
-        tokens.approveGameContract(msg.sender, defaultCoinAmount);
-        emit GameApprovedForSpending(msg.sender, gameContract, defaultCoinAmount);
-    }
-
-    function resetSpendApproval()
-        private
-    {
-        tokens.approveGameContract(msg.sender, 0);
-        emit GameApprovalReset(msg.sender, gameContract, 0);
-    }
-
     event UserSpentCoins(address indexed user, uint amount);
 
     function spendCoins(uint coins)
         public
     {
-        tokens.transferFromContractInitiated(msg.sender, coins);
+        tokens.directTransferFromUser(msg.sender, coins);
         emit UserSpentCoins(msg.sender, coins);
-        resetSpendApproval();
+        // resetSpendApproval();
     }
 
     event UserPurchasedCoins(address indexed user, uint amount);
