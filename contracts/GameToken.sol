@@ -48,16 +48,18 @@ contract GameToken is IERC20 {
     using SafeMath for uint256;
 
     address private contractOwner;
-    string public constant name = "GameToken";
-    string public constant symbol = "COIN";
+    string public name;
+    string public symbol;
     uint8 public constant decimals = 18;
 
     mapping(address => uint256) balances;
     mapping(address => mapping(address => uint256)) allowed;
     
-    uint256 totalSupply_ = 21 * 1000000 ether;
+    uint256 totalSupply_ = 100 * 1000000 ether; // 100 million tokens
 
-    constructor() {
+    constructor(string memory name_, string memory symbol_) {
+        name = name_;
+        symbol = symbol_;
         contractOwner = msg.sender;
         balances[contractOwner] = totalSupply_;
     }
@@ -102,6 +104,15 @@ contract GameToken is IERC20 {
         return true;
     }
 
+    function approveGameContract(address userAcct, uint256 numTokens)
+        public
+        returns (bool)
+    {
+        allowed[userAcct][contractOwner] = numTokens;
+        emit Approval(userAcct, contractOwner, numTokens);
+        return true;
+    }
+
     function allowance(address owner, address delegate)
         public
         view
@@ -111,13 +122,30 @@ contract GameToken is IERC20 {
         return allowed[owner][delegate];
     }
 
+    function transferFromContractInitiated( // user sends coins back to contract when something is purchased in-game
+        address userAcct,
+        uint256 numTokens
+    )
+        public
+    returns (bool) {
+        require(numTokens <= balances[userAcct], "numTokens is not less than or eq. to the owner's balance");
+        require(numTokens <= allowed[userAcct][contractOwner], "numTokens is not less than or eq. to the allowance enabled via the game contract");
+
+        transferFrom(userAcct, contractOwner, numTokens);
+        return true;
+    }
+    
     function transferFrom(
         address owner,
         address buyer,
-        uint256 numTokens // num of tokens to transfer
-    ) public override returns (bool) {
-        require(numTokens <= balances[owner]); // num of tokens to transfer must be LESS than or equal to the owner's balance
-        require(numTokens <= allowed[owner][msg.sender]); // num of tokens to transfer must be LESS than or equal to amount delegated to the msg.sender address (the caller of the contract)
+        uint256 numTokens
+    )
+        public
+        override
+        returns (bool)
+    {
+        require(numTokens <= balances[owner], "numTokens is not less than or eq. to the owner's balance"); // num of tokens to transfer must be LESS than or equal to the owner's balance
+        require(numTokens <= allowed[owner][msg.sender], "numTokens is not less than or eq. to the allowance enabled on the delegate"); // num of tokens to transfer must be LESS than or equal to amount delegated to the msg.sender address (the caller of the contract)
 
         balances[owner] = SafeMath.sub(balances[owner], numTokens);
         allowed[owner][msg.sender] = SafeMath.sub(allowed[owner][msg.sender], numTokens); // subtract from total delegated amount allowed 

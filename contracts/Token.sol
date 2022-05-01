@@ -43,28 +43,17 @@ library SafeMath { // Only relevant functions
     }
 }
 
-contract DEATHSANDWICHTOKEN is IERC20 {
+contract Token is IERC20 {
 
     using SafeMath for uint256;
 
     address private contractOwner;
-    string public constant name = "DEATHSANDWICH";
-    string public constant symbol = "DETH";
+    string public constant name = "Test Token";
+    string public constant symbol = "TEST";
     uint8 public constant decimals = 18;
 
     mapping(address => uint256) balances;
     mapping(address => mapping(address => uint256)) allowed;
-
-/**
-    allowed:
-    
-    // my address..
-    0xSSsjdfklsklfjs... => {
-        // here, I'm allowing this address a certain amount of tokens to transfer on my behalf
-        0xUsj238409283fjdkl... :  10^18 * 4000
-    }
-    
-    */
     
     uint256 totalSupply_ = 21 * 1000000 ether;
 
