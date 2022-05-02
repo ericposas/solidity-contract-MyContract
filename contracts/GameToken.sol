@@ -47,6 +47,7 @@ contract GameToken is IERC20 {
 
     using SafeMath for uint256;
 
+    address private gameContract;
     address private contractOwner;
     string public name;
     string public symbol;
@@ -57,11 +58,18 @@ contract GameToken is IERC20 {
     
     uint256 totalSupply_ = 100 * 1000000 ether; // 100 million tokens
 
-    constructor(string memory name_, string memory symbol_) {
+    constructor(address owner, string memory name_, string memory symbol_) {
         name = name_;
         symbol = symbol_;
-        contractOwner = msg.sender;
+        contractOwner = owner; // we pass in the creator account here as the contractOwner
+        gameContract = msg.sender; // actial call from Game.sol sets sender as the game contract address
         balances[contractOwner] = totalSupply_;
+    }
+
+    modifier onlyGameContract()
+    {
+        require(msg.sender == gameContract, "msg.sender must be from the game contract address");
+        _;
     }
 
     function totalSupply()
@@ -89,6 +97,17 @@ contract GameToken is IERC20 {
     {
         require(numTokens <= balances[msg.sender]);
         balances[msg.sender] = SafeMath.sub(balances[msg.sender], numTokens);
+        balances[receiver] = SafeMath.add(balances[receiver], numTokens);
+        emit Transfer(msg.sender, receiver, numTokens);
+        return true;
+    }
+
+    function transferFromContractOwner(address receiver, uint256 numTokens)
+        public
+        returns (bool)
+    {
+        require(numTokens <= balances[contractOwner]);
+        balances[contractOwner] = SafeMath.sub(balances[contractOwner], numTokens);
         balances[receiver] = SafeMath.add(balances[receiver], numTokens);
         emit Transfer(msg.sender, receiver, numTokens);
         return true;

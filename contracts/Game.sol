@@ -6,27 +6,18 @@ import "./GameToken.sol"; // import ERC20 token to be used as in-game currency
 contract Game {
 
     GameToken tokens;
-    address payable gameContract;
-    string constant name = "Death Doll"; // ragdoll toss game
-    uint constant defaultCoinAmount = 100 * 1000000000000000000; // 100 DETH tokens
+    address payable gameContractOwner;
+    string constant name = "Game Contract";
+    uint constant defaultTokenAmount = 100 * 1000000000000000000; // 100 tokens
 
     constructor()
     {
-        gameContract = payable(msg.sender);
-        tokens = new GameToken("DeathSandwich Token", "DETH");
+        gameContractOwner = payable(msg.sender);
+        // need to set the owner in GameToken to msg.sender here...
+        tokens = new GameToken(gameContractOwner, "ZozoCoin", "ZOZO");
         // calling GameToken constructor here, makes the Game contract the owner of the token supply
         // if we have a game, we can then set up COIN distribution methods within Game contract
     }
-
-    // modifier gameOwnerOnly()
-    // {
-    //     require(msg.sender == 'deathsandwich.eth');
-    //     _;
-    // }
-
-    // function moveCoins() // only allow 'deathsandwich.eth' aka '0xf8...' to transfer eth out of the contract
-    // {
-    // }
 
     function getUserBal()
         public
@@ -36,26 +27,26 @@ contract Game {
         return tokens.balanceOf(msg.sender);
     }
 
-    event UserSpentCoins(address indexed user, uint amount);
+    event UserSpentTokens(address indexed user, uint amount);
 
-    function spendCoins(uint coins)
+    function spendTokens(uint tokens_)
         public
     {
-        tokens.directTransferFromUser(msg.sender, coins);
-        emit UserSpentCoins(msg.sender, coins);
-        // resetSpendApproval();
+        tokens.directTransferFromUser(msg.sender, tokens_);
+        emit UserSpentTokens(msg.sender, tokens_);
     }
 
     event UserPurchasedCoins(address indexed user, uint amount);
     
-    function buyCoins()
+    function buyTokens()
         public
         payable
     { // "payable" keyword allows a user to send along a { value } object containing Ether
         // calculate exchange rate of $20 of ether on client and send here
-        gameContract.transfer(msg.value);
-        tokens.transfer(msg.sender, defaultCoinAmount); // send 100 DETH
-        emit UserPurchasedCoins(msg.sender, defaultCoinAmount);
+        gameContractOwner.transfer(msg.value);
+        // tokens.transfer(msg.sender, defaultTokenAmount); // send 100 Tokens
+        tokens.transferFromContractOwner(msg.sender, defaultTokenAmount); // send 100 Tokens
+        emit UserPurchasedCoins(msg.sender, defaultTokenAmount);
     }
 
 }
